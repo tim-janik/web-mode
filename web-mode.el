@@ -577,6 +577,11 @@ See web-mode-block-face."
   "Face for element interpolation strings."
   :group 'web-mode-faces)
 
+(defface web-mode-interpolate-color4-face
+  '((t :inherit font-lock-comment-face))
+  "Face for comment-like element interpolation strings."
+  :group 'web-mode-faces)
+
 (defface web-mode-css-string-face
   '((t :inherit web-mode-string-face))
   "Face for css strings."
@@ -7053,11 +7058,20 @@ Also return non-nil if it is the command `self-insert-command' is remapped to."
     (cond
      ((web-mode-looking-back "\\(css\\|styled[[:alnum:].]+\\)" beg)
       (goto-char (1+ beg))
-      (while (re-search-forward ".*?:" end t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'font-lock-face
-                           'web-mode-interpolate-color1-face)
-        )
+      (while (re-search-forward "//.*?\n\\|/\\*.*?\\*/\\|[-$[:alnum:]_]+? *:" end t)
+        (cond
+         ((member (char-after (match-beginning 0)) '(?\/))
+          (put-text-property (match-beginning 0) (match-end 0)
+                             'font-lock-face
+                             'web-mode-interpolate-color4-face)
+          )
+         (t
+          (put-text-property (match-beginning 0) (match-end 0)
+                             'font-lock-face
+                             'web-mode-interpolate-color1-face)
+          ) ;t
+         ) ;cond
+        ) ;while
       ) ;case css
      ((web-mode-looking-back "\\(template\\|html\\)" beg)
       (goto-char (1+ beg))
